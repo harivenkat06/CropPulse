@@ -1,0 +1,132 @@
+import type { FarmerLocation } from "@/types/logistics";
+
+export const LOCATION_OPTIONS: FarmerLocation[] = [
+  {
+    town: "Kanchipuram",
+    district: "Kancheepuram",
+    state: "Tamil Nadu",
+    latitude: 12.8342,
+    longitude: 79.7036,
+  },
+  {
+    town: "Sriperumbudur",
+    district: "Kancheepuram",
+    state: "Tamil Nadu",
+    latitude: 12.9685,
+    longitude: 79.9407,
+  },
+  {
+    town: "Chengalpattu",
+    district: "Chengalpattu",
+    state: "Tamil Nadu",
+    latitude: 12.6819,
+    longitude: 79.9757,
+  },
+  {
+    town: "Koyambedu Market",
+    district: "Chennai",
+    state: "Tamil Nadu",
+    latitude: 13.0694,
+    longitude: 80.1948,
+  },
+  {
+    town: "Coimbatore",
+    district: "Coimbatore",
+    state: "Tamil Nadu",
+    latitude: 11.0168,
+    longitude: 76.9558,
+  },
+  {
+    town: "Kinathukadavu",
+    district: "Coimbatore",
+    state: "Tamil Nadu",
+    latitude: 10.8144,
+    longitude: 76.9867,
+  },
+  {
+    town: "Erode",
+    district: "Erode",
+    state: "Tamil Nadu",
+    latitude: 11.341,
+    longitude: 77.7172,
+  },
+  {
+    town: "Salem",
+    district: "Salem",
+    state: "Tamil Nadu",
+    latitude: 11.6643,
+    longitude: 78.146,
+  },
+  {
+    town: "Thanjavur",
+    district: "Thanjavur",
+    state: "Tamil Nadu",
+    latitude: 10.787,
+    longitude: 79.1378,
+  },
+  {
+    town: "Madurai",
+    district: "Madurai",
+    state: "Tamil Nadu",
+    latitude: 9.9252,
+    longitude: 78.1198,
+  },
+  {
+    town: "Ooty",
+    district: "Nilgiris",
+    state: "Tamil Nadu",
+    latitude: 11.4102,
+    longitude: 76.695,
+  },
+  {
+    town: "Pollachi",
+    district: "Coimbatore",
+    state: "Tamil Nadu",
+    latitude: 10.6609,
+    longitude: 77.0084,
+  },
+  {
+    town: "Tirupur",
+    district: "Tirupur",
+    state: "Tamil Nadu",
+    latitude: 11.1085,
+    longitude: 77.3411,
+  },
+  {
+    town: "Madurantakam",
+    district: "Chengalpattu",
+    state: "Tamil Nadu",
+    latitude: 12.496,
+    longitude: 79.899,
+  },
+  {
+    town: "Walajabad",
+    district: "Kancheepuram",
+    state: "Tamil Nadu",
+    latitude: 12.8667,
+    longitude: 79.7167,
+  },
+].sort((a, b) => a.town.localeCompare(b.town));
+
+export const VEHICLE_OPTIONS = [
+  { label: "Mini Truck", icon: "truck-outline" as const, capacity: "500-1000 kg" },
+  { label: "Truck", icon: "truck" as const, capacity: "1000-3000 kg" },
+  { label: "Tractor Trolley", icon: "tractor" as const, capacity: "1000-2000 kg" },
+  { label: "Auto", icon: "rickshaw" as const, capacity: "200-500 kg" },
+  { label: "Pickup Van", icon: "van-utility" as const, capacity: "300-800 kg" },
+];
+
+export const LOGISTICS_CROP_OPTIONS = [
+  { name: "Tomato", icon: "🍅" },
+  { name: "Onion", icon: "🧅" },
+  { name: "Wheat", icon: "🌾" },
+  { name: "Rice (Paddy)", icon: "🌾" },
+  { name: "Cotton", icon: "☁️" },
+  { name: "Turmeric", icon: "🟡" },
+  { name: "Banana", icon: "🍌" },
+  { name: "Sugarcane", icon: "🎋" },
+  { name: "Groundnut", icon: "🥜" },
+  { name: "Maize", icon: "🌽" },
+  { name: "Chilli", icon: "🌶️" },
+  { name: "Mango", icon: "🥭" },
+];

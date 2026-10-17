@@ -1,0 +1,296 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String  @id @default(uuid())
+  role         String // FARMER | BUYER | LOGISTICS_PROVIDER | ADMIN
+  name         String
+  phone        String  @unique
+  email        String? @unique
+  password     String
+  district     String?
+  state        String?
+  village      String?
+  latitude     Float?
+  longitude    Float?
+  profileImage String?
+
+  farmerProfile    FarmerProfile?
+  buyerProfile     BuyerProfile?
+  logisticsProfile LogisticsProvider?
+
+  listings       Listing[]
+  ordersAsBuyer  Order[]   @relation("BuyerOrders")
+  ordersAsSeller Order[]   @relation("SellerOrders")
+
+  logisticsRequests       LogisticsRequest[]
+  logisticsJoinRequests   LogisticsJoinRequest[]
+  logisticsParticipations LogisticsParticipant[]
+
+  messages            Message[]
+  notifications       Notification[]
+  conversationMembers ConversationMember[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model FarmerProfile {
+  id             String   @id @default(uuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  farmSize       Float? // in acres or hectares
+  preferredCrops String? // comma-separated crop IDs or names
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
+model BuyerProfile {
+  id                String   @id @default(uuid())
+  userId            String   @unique
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessName      String?
+  buyingPreferences String? // comma-separated values
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+model Crop {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  icon      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  listings     Listing[]
+  marketPrices MarketPrice[]
+}
+
+model Market {
+  id        String  @id @default(uuid())
+  name      String
+  district  String
+  state     String
+  latitude  Float?
+  longitude Float?
+  type      String?
+
+  marketPrices MarketPrice[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MarketPrice {
+  id       String @id @default(uuid())
+  cropId   String
+  marketId String
+  crop     Crop   @relation(fields: [cropId], references: [id])
+  market   Market @relation(fields: [marketId], references: [id])
+
+  variety    String?
+  minPrice   Float?
+  maxPrice   Float?
+  modalPrice Float
+  unit       String   @default("quintal")
+  arrivalQty Float?
+  date       DateTime
+  source     String?
+
+  createdAt DateTime @default(now())
+
+  @@index([cropId])
+  @@index([marketId])
+  @@index([date])
+}
+
+model Listing {
+  id       String @id @default(uuid())
+  sellerId String
+  seller   User   @relation(fields: [sellerId], references: [id])
+  cropId   String
+  crop     Crop   @relation(fields: [cropId], references: [id])
+
+  quantity      Float
+  unit          String
+  expectedPrice Float
+  quality       String?
+  harvestDate   DateTime?
+  location      String?
+  status        String    @default("ACTIVE") // ACTIVE | INACTIVE | SOLD | CANCELLED
+
+  orders Order[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id        String   @id @default(uuid())
+  listingId String?
+  listing   Listing? @relation(fields: [listingId], references: [id])
+
+  buyerId  String
+  buyer    User   @relation("BuyerOrders", fields: [buyerId], references: [id])
+  sellerId String
+  seller   User   @relation("SellerOrders", fields: [sellerId], references: [id])
+
+  quantity Float
+  price    Float
+  status   String @default("PENDING") // PENDING | ACCEPTED | REJECTED | CONFIRMED | DELIVERED | CANCELLED
+
+  logisticsRequests LogisticsRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LogisticsProvider {
+  id     String @id @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  vehicleType  String?
+  capacity     Float? // in kg
+  isAvailable  Boolean @default(true)
+  rating       Float?
+  serviceAreas String? // comma-separated values
+
+  matches LogisticsMatch[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LogisticsRequest {
+  id          String @id @default(uuid())
+  requesterId String
+  requester   User   @relation(fields: [requesterId], references: [id])
+
+  orderId String?
+  order   Order?  @relation(fields: [orderId], references: [id])
+
+  pickupLocation  String
+  destination     String
+  cropName        String?
+  quantity        Float
+  preferredDate   DateTime?
+  vehicleType     String?
+  offeredPrice    Float?
+  vehicleCapacity Float?
+  estimatedCost   Float?
+  maxFarmers      Int?
+  preferredTime   String?
+  notes           String?
+
+  status String @default("PENDING") // PENDING | MATCHED | IN_TRANSIT | DELIVERED | CANCELLED
+
+  matches      LogisticsMatch[]
+  joinRequests LogisticsJoinRequest[]
+  participants LogisticsParticipant[]
+  conversation Conversation?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LogisticsMatch {
+  id         String            @id @default(uuid())
+  requestId  String
+  request    LogisticsRequest  @relation(fields: [requestId], references: [id])
+  providerId String
+  provider   LogisticsProvider @relation(fields: [providerId], references: [id])
+
+  estimatedCost Float?
+  status        String @default("PENDING") // PENDING | ACCEPTED | REJECTED | COMPLETED
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model LogisticsJoinRequest {
+  id             String           @id @default(uuid())
+  requestId      String
+  request        LogisticsRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  farmerId       String
+  farmer         User             @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  quantity       Float
+  farmerLocation String?
+  status         String           @default("PENDING")
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@unique([requestId, farmerId])
+  @@index([farmerId, status])
+}
+
+model LogisticsParticipant {
+  id        String           @id @default(uuid())
+  requestId String
+  request   LogisticsRequest @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  farmerId  String
+  farmer    User             @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  quantity  Float
+  joinedAt  DateTime         @default(now())
+
+  @@unique([requestId, farmerId])
+  @@index([farmerId])
+}
+
+model Conversation {
+  id                 String            @id @default(uuid())
+  title              String?
+  logisticsRequestId String?           @unique
+  logisticsRequest   LogisticsRequest? @relation(fields: [logisticsRequestId], references: [id], onDelete: Cascade)
+
+  members  ConversationMember[]
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ConversationMember {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+
+  joinedAt DateTime @default(now())
+
+  @@unique([conversationId, userId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+
+  content String
+  isRead  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  title              String
+  body               String
+  type               String?
+  logisticsRequestId String?
+  isRead             Boolean @default(false)
+
+  createdAt DateTime @default(now())
+}
